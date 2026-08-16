@@ -1,0 +1,73 @@
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+
+from database import get_db
+from models import Pedido, PerfilUsuario, Usuario
+from models.enums import CanalPedido, StatusPedido
+from schemas.pedido import PedidoCreate, PedidoRead, PedidoStatusUpdate
+from services.auth import get_current_user, require_perfis
+from services.exceptions import RecursoNaoEncontrado, RegraDeNegocioViolada
+from services.pedidos import atualizar_status, criar_pedido
+
+router = APIRouter(prefix="/pedidos", tags=["pedidos"])
+
+DbSession = Annotated[Session, Depends(get_db)]
+UsuarioAtual = Annotated[Usuario, Depends(get_current_user)]
+GerenciaPedidos = Depends(
+    require_perfis(
+        PerfilUsuario.ADMIN,
+        PerfilUsuario.GERENTE,
+        PerfilUsuario.ATENDENTE,
+        PerfilUsuario.COZINHA,
+    )
+)
+
+
+@router.post("", response_model=PedidoRead, status_code=status.HTTP_201_CREATED)
+def criar(dados: PedidoCreate, db: DbSession, usuario: UsuarioAtual) -> Pedido:
+    try:
+        return criar_pedido(db, usuario, dados)
+    except RecursoNaoEncontrado as erro:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(erro))
+
+
+@router.get("", response_model=list[PedidoRead])
+def listar(
+    db: DbSession,
+    usuario: UsuarioAtual,
+    canal_pedido: Annotated[CanalPedido | None, Query(alias="canalPedido")] = None,
+    status_pedido: Annotated[StatusPedido | None, Query(alias="status")] = None,
+) -> list[Pedido]:
+    consulta = db.query(Pedido)
+    if usuario.perfil == PerfilUsuario.CLIENTE:
+        consulta = consulta.filter(Pedido.usuario_id == usuario.id)
+    if canal_pedido is not None:
+        consulta = consulta.filter(Pedido.canal == canal_pedido)
+    if status_pedido is not None:
+        consulta = consulta.filter(Pedido.status == status_pedido)
+    return consulta.all()
+
+
+@router.get("/{pedido_id}", response_model=PedidoRead)
+def obter(pedido_id: int, db: DbSession, usuario: UsuarioAtual) -> Pedido:
+    pedido = db.get(Pedido, pedido_id)
+    if pedido is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido não encontrado")
+    if usuario.perfil == PerfilUsuario.CLIENTE and pedido.usuario_id != usuario.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Sem permissão para este recurso"
+        )
+    return pedido
+
+
+@router.patch("/{pedido_id}/status", response_model=PedidoRead, dependencies=[GerenciaPedidos])
+def atualizar(pedido_id: int, dados: PedidoStatusUpdate, db: DbSession) -> Pedido:
+    pedido = db.get(Pedido, pedido_id)
+    if pedido is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido não encontrado")
+    try:
+        return atualizar_status(db, pedido, dados.status)
+    except RegraDeNegocioViolada as erro:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro))

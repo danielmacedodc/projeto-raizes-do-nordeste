@@ -51,3 +51,23 @@ def obter_token(client, registrar_usuario):
         return resposta.json()["access_token"]
 
     return _obter_token
+
+
+@pytest.fixture
+def unidade_e_produto(client, obter_token):
+    token = obter_token("admin.setup@teste.com", "ADMIN")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    unidade = client.post(
+        "/unidades",
+        json={"nome": "Matriz", "endereco": "Rua A, 100", "cidade": "Recife"},
+        headers=headers,
+    ).json()
+
+    produto = client.post(
+        "/produtos",
+        json={"nome": "X-Burger", "categoria": "Lanche", "preco": 19.9},
+        headers=headers,
+    ).json()
+
+    return {"unidade_id": unidade["id"], "produto_id": produto["id"]}
