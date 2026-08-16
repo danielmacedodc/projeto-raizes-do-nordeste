@@ -15,8 +15,14 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 DbSession = Annotated[Session, Depends(get_db)]
 
 
-@router.post("/cadastro", response_model=UsuarioRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/cadastro",
+    response_model=UsuarioRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Cadastrar novo usuário",
+)
 def cadastrar_usuario(dados: UsuarioCreate, db: DbSession) -> Usuario:
+    """Cria o cadastro com senha em hash (Argon2) e registra o consentimento LGPD."""
     if db.query(Usuario).filter(Usuario.email == dados.email).first() is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="E-mail já cadastrado")
 
@@ -33,8 +39,9 @@ def cadastrar_usuario(dados: UsuarioCreate, db: DbSession) -> Usuario:
     return usuario
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse, summary="Autenticar e gerar token JWT")
 def login(dados: LoginRequest, db: DbSession) -> TokenResponse:
+    """Retorna um token Bearer válido por `ACCESS_TOKEN_EXPIRE_MINUTES` minutos."""
     usuario = db.query(Usuario).filter(Usuario.email == dados.email).first()
     if usuario is None or not verify_password(dados.senha, usuario.senha_hash):
         raise HTTPException(

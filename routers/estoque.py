@@ -26,8 +26,10 @@ GerenciaEstoque = Depends(
     response_model=EstoqueRead,
     status_code=status.HTTP_201_CREATED,
     dependencies=[GerenciaEstoque],
+    summary="Registrar entrada ou saída de estoque",
 )
 def movimentar(dados: MovimentoEstoqueCreate, db: DbSession) -> Estoque:
+    """Restrito a ADMIN/GERENTE/COZINHA. SAIDA falha com 409 se o saldo for insuficiente."""
     try:
         return registrar_movimento(
             db, dados.produto_id, dados.unidade_id, dados.tipo, dados.quantidade
@@ -38,13 +40,19 @@ def movimentar(dados: MovimentoEstoqueCreate, db: DbSession) -> Estoque:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro))
 
 
-@router.get("", response_model=Pagina[EstoqueRead], dependencies=[RequerLogin])
+@router.get(
+    "",
+    response_model=Pagina[EstoqueRead],
+    dependencies=[RequerLogin],
+    summary="Consultar saldo de estoque",
+)
 def listar(
     db: DbSession,
     unidade_id: int | None = None,
     page: Annotated[int, Query(ge=1)] = 1,
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
 ) -> dict:
+    """Requer autenticação. Filtre por `unidade_id` para o saldo de uma unidade específica."""
     consulta = db.query(Estoque)
     if unidade_id is not None:
         consulta = consulta.filter(Estoque.unidade_id == unidade_id)

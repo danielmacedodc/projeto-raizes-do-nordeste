@@ -12,7 +12,17 @@ class ProdutoBase(BaseModel):
 
 
 class ProdutoCreate(ProdutoBase):
-    pass
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "nome": "X-Burger",
+                "descricao": "Hambúrguer, queijo, alface e tomate",
+                "categoria": "Lanche",
+                "preco": 19.90,
+                "ativo": True,
+            }
+        }
+    )
 
 
 class ProdutoRead(ProdutoBase):

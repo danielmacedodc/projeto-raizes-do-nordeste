@@ -7,6 +7,8 @@ from models.enums import StatusPagamento
 
 
 class PagamentoCreate(BaseModel):
+    model_config = ConfigDict(json_schema_extra={"example": {"pedido_id": 1, "metodo": "cartao"}})
+
     pedido_id: int
     metodo: str = Field(min_length=1, max_length=40)
 

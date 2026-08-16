@@ -27,8 +27,11 @@ GerenciaPedidos = Depends(
 )
 
 
-@router.post("", response_model=PedidoRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "", response_model=PedidoRead, status_code=status.HTTP_201_CREATED, summary="Criar pedido"
+)
 def criar(dados: PedidoCreate, db: DbSession, usuario: UsuarioAtual) -> Pedido:
+    """Requer autenticação. `canalPedido` é obrigatório; 404 se unidade/produto não existir, 409 se estoque insuficiente."""
     try:
         return criar_pedido(db, usuario, dados)
     except RecursoNaoEncontrado as erro:
@@ -37,7 +40,7 @@ def criar(dados: PedidoCreate, db: DbSession, usuario: UsuarioAtual) -> Pedido:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro))
 
 
-@router.get("", response_model=Pagina[PedidoRead])
+@router.get("", response_model=Pagina[PedidoRead], summary="Listar pedidos")
 def listar(
     db: DbSession,
     usuario: UsuarioAtual,
@@ -46,6 +49,7 @@ def listar(
     page: Annotated[int, Query(ge=1)] = 1,
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
 ) -> dict:
+    """CLIENTE vê apenas os próprios pedidos; staff vê todos. Filtre por `canalPedido` e `status`."""
     consulta = db.query(Pedido)
     if usuario.perfil == PerfilUsuario.CLIENTE:
         consulta = consulta.filter(Pedido.usuario_id == usuario.id)
@@ -57,8 +61,9 @@ def listar(
     return {"items": itens, "page": page, "limit": limit, "total": total}
 
 
-@router.get("/{pedido_id}", response_model=PedidoRead)
+@router.get("/{pedido_id}", response_model=PedidoRead, summary="Consultar pedido por ID")
 def obter(pedido_id: int, db: DbSession, usuario: UsuarioAtual) -> Pedido:
+    """403 se um CLIENTE tentar consultar pedido de outro usuário."""
     pedido = db.get(Pedido, pedido_id)
     if pedido is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido não encontrado")
@@ -69,8 +74,14 @@ def obter(pedido_id: int, db: DbSession, usuario: UsuarioAtual) -> Pedido:
     return pedido
 
 
-@router.patch("/{pedido_id}/status", response_model=PedidoRead, dependencies=[GerenciaPedidos])
+@router.patch(
+    "/{pedido_id}/status",
+    response_model=PedidoRead,
+    dependencies=[GerenciaPedidos],
+    summary="Atualizar status do pedido",
+)
 def atualizar(pedido_id: int, dados: PedidoStatusUpdate, db: DbSession) -> Pedido:
+    """Restrito a staff (ADMIN/GERENTE/ATENDENTE/COZINHA). Transições: RECEBIDO -> EM_PREPARO -> PRONTO -> ENTREGUE, com CANCELADO permitido em qualquer estado não-terminal; 409 se a transição for inválida."""
     pedido = db.get(Pedido, pedido_id)
     if pedido is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido não encontrado")

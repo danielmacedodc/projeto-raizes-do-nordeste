@@ -9,7 +9,16 @@ class UnidadeBase(BaseModel):
 
 
 class UnidadeCreate(UnidadeBase):
-    pass
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "nome": "Matriz Centro",
+                "endereco": "Rua das Flores, 100",
+                "cidade": "Recife",
+                "ativa": True,
+            }
+        }
+    )
 
 
 class UnidadeRead(UnidadeBase):

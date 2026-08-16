@@ -21,6 +21,16 @@ class ItemPedidoRead(BaseModel):
 
 
 class PedidoCreate(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "unidade_id": 1,
+                "canal": "TOTEM",
+                "itens": [{"produto_id": 1, "quantidade": 2}],
+            }
+        }
+    )
+
     unidade_id: int
     canal: CanalPedido
     itens: list[ItemPedidoCreate] = Field(min_length=1)
@@ -41,4 +51,6 @@ class PedidoRead(BaseModel):
 
 
 class PedidoStatusUpdate(BaseModel):
+    model_config = ConfigDict(json_schema_extra={"example": {"status": "EM_PREPARO"}})
+
     status: StatusPedido

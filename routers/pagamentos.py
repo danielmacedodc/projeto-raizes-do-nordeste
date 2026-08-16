@@ -16,8 +16,14 @@ DbSession = Annotated[Session, Depends(get_db)]
 UsuarioAtual = Annotated[Usuario, Depends(get_current_user)]
 
 
-@router.post("", response_model=PagamentoRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=PagamentoRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Processar pagamento (gateway mock)",
+)
 def criar(dados: PagamentoCreate, db: DbSession, usuario: UsuarioAtual) -> Pagamento:
+    """Simula um gateway externo (aprova/recusa); 409 se o pedido já tiver pagamento registrado."""
     pedido = db.get(Pedido, dados.pedido_id)
     if pedido is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido não encontrado")

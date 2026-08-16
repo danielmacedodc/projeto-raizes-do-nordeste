@@ -17,6 +17,8 @@ class FidelidadeRead(BaseModel):
 
 
 class FidelidadeResgate(BaseModel):
+    model_config = ConfigDict(json_schema_extra={"example": {"pontos": 20}})
+
     pontos: int = Field(gt=0)
 
 

@@ -16,14 +16,23 @@ DbSession = Annotated[Session, Depends(get_db)]
 UsuarioAtual = Annotated[Usuario, Depends(get_current_user)]
 
 
-@router.get("/saldo", response_model=SaldoFidelidadeRead)
+@router.get(
+    "/saldo", response_model=SaldoFidelidadeRead, summary="Consultar saldo de pontos"
+)
 def obter_saldo(db: DbSession, usuario: UsuarioAtual) -> SaldoFidelidadeRead:
+    """Saldo sempre do usuário autenticado (1 ponto acumulado por real gasto em pedido entregue)."""
     saldo = calcular_saldo(db, usuario.id)
     return SaldoFidelidadeRead(usuario_id=usuario.id, saldo=saldo)
 
 
-@router.post("/resgate", response_model=FidelidadeRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/resgate",
+    response_model=FidelidadeRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Resgatar pontos de fidelidade",
+)
 def resgatar(dados: FidelidadeResgate, db: DbSession, usuario: UsuarioAtual) -> Fidelidade:
+    """409 se o saldo de pontos for insuficiente."""
     try:
         return resgatar_pontos(db, usuario.id, dados.pontos)
     except RegraDeNegocioViolada as erro:

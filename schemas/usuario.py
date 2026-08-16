@@ -12,6 +12,18 @@ class UsuarioBase(BaseModel):
 
 
 class UsuarioCreate(UsuarioBase):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "nome": "Maria Silva",
+                "email": "maria@exemplo.com",
+                "perfil": "CLIENTE",
+                "senha": "senhaforte123",
+                "consentimento_lgpd": True,
+            }
+        }
+    )
+
     senha: str = Field(min_length=8, max_length=100)
     consentimento_lgpd: bool
 

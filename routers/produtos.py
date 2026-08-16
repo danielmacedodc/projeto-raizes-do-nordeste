@@ -21,8 +21,10 @@ GerenciaProdutos = Depends(require_perfis(PerfilUsuario.ADMIN, PerfilUsuario.GER
     response_model=ProdutoRead,
     status_code=status.HTTP_201_CREATED,
     dependencies=[GerenciaProdutos],
+    summary="Criar produto",
 )
 def criar_produto(dados: ProdutoCreate, db: DbSession) -> Produto:
+    """Restrito a ADMIN e GERENTE."""
     produto = Produto(**dados.model_dump())
     db.add(produto)
     db.commit()
@@ -30,17 +32,18 @@ def criar_produto(dados: ProdutoCreate, db: DbSession) -> Produto:
     return produto
 
 
-@router.get("", response_model=Pagina[ProdutoRead])
+@router.get("", response_model=Pagina[ProdutoRead], summary="Listar produtos (cardápio)")
 def listar_produtos(
     db: DbSession,
     page: Annotated[int, Query(ge=1)] = 1,
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
 ) -> dict:
+    """Acesso público, sem autenticação."""
     itens, total = paginar(db.query(Produto), page, limit)
     return {"items": itens, "page": page, "limit": limit, "total": total}
 
 
-@router.get("/{produto_id}", response_model=ProdutoRead)
+@router.get("/{produto_id}", response_model=ProdutoRead, summary="Consultar produto por ID")
 def obter_produto(produto_id: int, db: DbSession) -> Produto:
     produto = db.get(Produto, produto_id)
     if produto is None:

@@ -23,6 +23,12 @@ class EstoqueRead(EstoqueBase):
 
 
 class MovimentoEstoqueCreate(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {"produto_id": 1, "unidade_id": 1, "tipo": "ENTRADA", "quantidade": 50}
+        }
+    )
+
     produto_id: int
     unidade_id: int
     tipo: TipoMovimentoEstoque
