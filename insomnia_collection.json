@@ -1,0 +1,393 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-08-16T12:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v8.0.0",
+  "resources": [
+    {
+      "_id": "wrk_lanchonete",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "Lanchonete Raizes API",
+      "description": "Coleção de testes da API da rede de lanchonetes do projeto raizes",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_lanchonete",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://127.0.0.1:8000",
+        "token": "",
+        "token_cliente": "",
+        "unidade_id": "1",
+        "produto_id": "1",
+        "pedido_id": "1"
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": -1000
+    },
+
+    { "_id": "fld_auth", "_type": "request_group", "parentId": "wrk_lanchonete", "name": "Auth", "metaSortKey": -7000 },
+    { "_id": "fld_unidades", "_type": "request_group", "parentId": "wrk_lanchonete", "name": "Unidades", "metaSortKey": -6000 },
+    { "_id": "fld_produtos", "_type": "request_group", "parentId": "wrk_lanchonete", "name": "Produtos", "metaSortKey": -5000 },
+    { "_id": "fld_estoque", "_type": "request_group", "parentId": "wrk_lanchonete", "name": "Estoque", "metaSortKey": -4000 },
+    { "_id": "fld_pedidos", "_type": "request_group", "parentId": "wrk_lanchonete", "name": "Pedidos", "metaSortKey": -3000 },
+    { "_id": "fld_pagamentos", "_type": "request_group", "parentId": "wrk_lanchonete", "name": "Pagamentos", "metaSortKey": -2000 },
+    { "_id": "fld_fidelidade", "_type": "request_group", "parentId": "wrk_lanchonete", "name": "Fidelidade", "metaSortKey": -1500 },
+    { "_id": "fld_erros", "_type": "request_group", "parentId": "wrk_lanchonete", "name": "Cenários de Erro", "metaSortKey": -1000 },
+
+    {
+      "_id": "req_auth_cadastro",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Cadastrar usuário (ADMIN)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/cadastro",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Admin Geral\",\n  \"email\": \"admin@lanchonete.com\",\n  \"senha\": \"senha12345\",\n  \"perfil\": \"ADMIN\",\n  \"consentimento_lgpd\": true\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -4000
+    },
+    {
+      "_id": "req_auth_login",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login (ADMIN)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@lanchonete.com\",\n  \"senha\": \"senha12345\"\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -3000
+    },
+    {
+      "_id": "req_auth_cadastro_cliente",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Cadastrar usuário (CLIENTE)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/cadastro",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Cliente Teste\",\n  \"email\": \"cliente@lanchonete.com\",\n  \"senha\": \"senha12345\",\n  \"perfil\": \"CLIENTE\",\n  \"consentimento_lgpd\": true\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -2000
+    },
+    {
+      "_id": "req_auth_login_cliente",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login (CLIENTE)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"cliente@lanchonete.com\",\n  \"senha\": \"senha12345\"\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -1000
+    },
+
+    {
+      "_id": "req_unidades_criar",
+      "_type": "request",
+      "parentId": "fld_unidades",
+      "name": "Criar unidade (ADMIN/GERENTE)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/unidades",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Unidade Centro\",\n  \"endereco\": \"Rua Principal, 100\",\n  \"cidade\": \"São Paulo\",\n  \"ativa\": true\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -3000
+    },
+    {
+      "_id": "req_unidades_listar",
+      "_type": "request",
+      "parentId": "fld_unidades",
+      "name": "Listar unidades (público, paginado)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/unidades?page=1&limit=10",
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -2000
+    },
+    {
+      "_id": "req_unidades_obter",
+      "_type": "request",
+      "parentId": "fld_unidades",
+      "name": "Obter unidade por id (público)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/unidades/{{ _.unidade_id }}",
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1000
+    },
+
+    {
+      "_id": "req_produtos_criar",
+      "_type": "request",
+      "parentId": "fld_produtos",
+      "name": "Criar produto (ADMIN/GERENTE)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/produtos",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"X-Burger\",\n  \"descricao\": \"Hambúrguer com queijo\",\n  \"categoria\": \"Lanches\",\n  \"preco\": 24.90,\n  \"ativo\": true\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -3000
+    },
+    {
+      "_id": "req_produtos_listar",
+      "_type": "request",
+      "parentId": "fld_produtos",
+      "name": "Listar produtos / cardápio (público, paginado)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/produtos?page=1&limit=10",
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -2000
+    },
+    {
+      "_id": "req_produtos_obter",
+      "_type": "request",
+      "parentId": "fld_produtos",
+      "name": "Obter produto por id (público)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/produtos/{{ _.produto_id }}",
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -1000
+    },
+
+    {
+      "_id": "req_estoque_movimentar",
+      "_type": "request",
+      "parentId": "fld_estoque",
+      "name": "Registrar movimentação - entrada (ADMIN/GERENTE/COZINHA)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/estoque/movimentacao",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"produto_id\": {{ _.produto_id }},\n  \"unidade_id\": {{ _.unidade_id }},\n  \"tipo\": \"ENTRADA\",\n  \"quantidade\": 50\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -2000
+    },
+    {
+      "_id": "req_estoque_listar",
+      "_type": "request",
+      "parentId": "fld_estoque",
+      "name": "Consultar saldo por unidade (requer login, paginado)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/estoque?unidade_id={{ _.unidade_id }}&page=1&limit=10",
+      "headers": [],
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -1000
+    },
+
+    {
+      "_id": "req_pedidos_criar",
+      "_type": "request",
+      "parentId": "fld_pedidos",
+      "name": "Criar pedido",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pedidos",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"unidade_id\": {{ _.unidade_id }},\n  \"canal\": \"TOTEM\",\n  \"itens\": [\n    { \"produto_id\": {{ _.produto_id }}, \"quantidade\": 2 }\n  ]\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -4000
+    },
+    {
+      "_id": "req_pedidos_listar",
+      "_type": "request",
+      "parentId": "fld_pedidos",
+      "name": "Listar pedidos (filtro por canal, paginado)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/pedidos?canalPedido=TOTEM&page=1&limit=10",
+      "headers": [],
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -3000
+    },
+    {
+      "_id": "req_pedidos_obter",
+      "_type": "request",
+      "parentId": "fld_pedidos",
+      "name": "Obter pedido por id",
+      "method": "GET",
+      "url": "{{ _.base_url }}/pedidos/{{ _.pedido_id }}",
+      "headers": [],
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -2000
+    },
+    {
+      "_id": "req_pedidos_status",
+      "_type": "request",
+      "parentId": "fld_pedidos",
+      "name": "Atualizar status do pedido (staff)",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/pedidos/{{ _.pedido_id }}/status",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"EM_PREPARO\"\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -1000
+    },
+
+    {
+      "_id": "req_pagamentos_criar",
+      "_type": "request",
+      "parentId": "fld_pagamentos",
+      "name": "Processar pagamento (gateway mock)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pagamentos",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"pedido_id\": {{ _.pedido_id }},\n  \"metodo\": \"cartao\"\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -1000
+    },
+
+    {
+      "_id": "req_fidelidade_saldo",
+      "_type": "request",
+      "parentId": "fld_fidelidade",
+      "name": "Consultar saldo de pontos",
+      "method": "GET",
+      "url": "{{ _.base_url }}/fidelidade/saldo",
+      "headers": [],
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -2000
+    },
+    {
+      "_id": "req_fidelidade_resgate",
+      "_type": "request",
+      "parentId": "fld_fidelidade",
+      "name": "Resgatar pontos",
+      "method": "POST",
+      "url": "{{ _.base_url }}/fidelidade/resgate",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"pontos\": 20\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -1000
+    },
+
+    {
+      "_id": "req_erro_login_invalido",
+      "_type": "request",
+      "parentId": "fld_erros",
+      "name": "T01 - Login com senha inválida (401)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@lanchonete.com\",\n  \"senha\": \"senha-errada\"\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -6000
+    },
+    {
+      "_id": "req_erro_sem_token",
+      "_type": "request",
+      "parentId": "fld_erros",
+      "name": "T02 - Criar pedido sem token (401)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pedidos",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"unidade_id\": {{ _.unidade_id }},\n  \"canal\": \"WEB\",\n  \"itens\": [\n    { \"produto_id\": {{ _.produto_id }}, \"quantidade\": 1 }\n  ]\n}"
+      },
+      "authentication": {},
+      "metaSortKey": -5000
+    },
+    {
+      "_id": "req_erro_sem_permissao",
+      "_type": "request",
+      "parentId": "fld_erros",
+      "name": "T03 - Criar unidade com perfil CLIENTE (403)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/unidades",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Unidade Teste\",\n  \"endereco\": \"Rua Teste, 1\",\n  \"cidade\": \"São Paulo\",\n  \"ativa\": true\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.token_cliente }}" },
+      "metaSortKey": -4000
+    },
+    {
+      "_id": "req_erro_campo_obrigatorio",
+      "_type": "request",
+      "parentId": "fld_erros",
+      "name": "T04 - Pedido sem canalPedido (422)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pedidos",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"unidade_id\": {{ _.unidade_id }},\n  \"itens\": [\n    { \"produto_id\": {{ _.produto_id }}, \"quantidade\": 1 }\n  ]\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -3000
+    },
+    {
+      "_id": "req_erro_recurso_inexistente",
+      "_type": "request",
+      "parentId": "fld_erros",
+      "name": "T05 - Pedido com unidade inexistente (404)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pedidos",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"unidade_id\": 9999,\n  \"canal\": \"WEB\",\n  \"itens\": [\n    { \"produto_id\": {{ _.produto_id }}, \"quantidade\": 1 }\n  ]\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -2000
+    },
+    {
+      "_id": "req_erro_estoque_insuficiente",
+      "_type": "request",
+      "parentId": "fld_erros",
+      "name": "T06 - Saída de estoque maior que o saldo (409)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/estoque/movimentacao",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"produto_id\": {{ _.produto_id }},\n  \"unidade_id\": {{ _.unidade_id }},\n  \"tipo\": \"SAIDA\",\n  \"quantidade\": 999999\n}"
+      },
+      "authentication": { "type": "bearer", "token": "{{ _.token }}" },
+      "metaSortKey": -1000
+    }
+  ]
+}
