@@ -70,4 +70,15 @@ def unidade_e_produto(client, obter_token):
         headers=headers,
     ).json()
 
+    client.post(
+        "/estoque/movimentacao",
+        json={
+            "produto_id": produto["id"],
+            "unidade_id": unidade["id"],
+            "tipo": "ENTRADA",
+            "quantidade": 100,
+        },
+        headers=headers,
+    )
+
     return {"unidade_id": unidade["id"], "produto_id": produto["id"]}

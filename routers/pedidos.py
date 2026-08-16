@@ -31,6 +31,8 @@ def criar(dados: PedidoCreate, db: DbSession, usuario: UsuarioAtual) -> Pedido:
         return criar_pedido(db, usuario, dados)
     except RecursoNaoEncontrado as erro:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(erro))
+    except RegraDeNegocioViolada as erro:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro))
 
 
 @router.get("", response_model=list[PedidoRead])

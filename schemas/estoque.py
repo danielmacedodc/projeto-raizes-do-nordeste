@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from models.enums import TipoMovimentoEstoque
+
 
 class EstoqueBase(BaseModel):
     produto_id: int
@@ -18,3 +20,10 @@ class EstoqueRead(EstoqueBase):
 
     id: int
     atualizado_em: datetime
+
+
+class MovimentoEstoqueCreate(BaseModel):
+    produto_id: int
+    unidade_id: int
+    tipo: TipoMovimentoEstoque
+    quantidade: int = Field(gt=0)

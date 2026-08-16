@@ -25,6 +25,11 @@ class StatusPedido(str, Enum):
     CANCELADO = "CANCELADO"
 
 
+class TipoMovimentoEstoque(str, Enum):
+    ENTRADA = "ENTRADA"
+    SAIDA = "SAIDA"
+
+
 class StatusPagamento(str, Enum):
     PENDENTE = "PENDENTE"
     APROVADO = "APROVADO"

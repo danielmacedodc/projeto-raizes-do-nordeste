@@ -2,7 +2,7 @@ from schemas.auth import LoginRequest, TokenResponse
 from schemas.usuario import UsuarioBase, UsuarioCreate, UsuarioRead
 from schemas.unidade import UnidadeBase, UnidadeCreate, UnidadeRead
 from schemas.produto import ProdutoBase, ProdutoCreate, ProdutoRead
-from schemas.estoque import EstoqueBase, EstoqueCreate, EstoqueRead
+from schemas.estoque import EstoqueBase, EstoqueCreate, EstoqueRead, MovimentoEstoqueCreate
 from schemas.pedido import (
     ItemPedidoCreate,
     ItemPedidoRead,
@@ -28,6 +28,7 @@ __all__ = [
     "EstoqueBase",
     "EstoqueCreate",
     "EstoqueRead",
+    "MovimentoEstoqueCreate",
     "ItemPedidoCreate",
     "ItemPedidoRead",
     "PedidoCreate",

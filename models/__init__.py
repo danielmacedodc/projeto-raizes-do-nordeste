@@ -4,6 +4,7 @@ from models.enums import (
     PerfilUsuario,
     StatusPagamento,
     StatusPedido,
+    TipoMovimentoEstoque,
     TipoMovimentoFidelidade,
 )
 from models.usuario import Usuario
@@ -21,6 +22,7 @@ __all__ = [
     "PerfilUsuario",
     "StatusPagamento",
     "StatusPedido",
+    "TipoMovimentoEstoque",
     "TipoMovimentoFidelidade",
     "Usuario",
     "Unidade",

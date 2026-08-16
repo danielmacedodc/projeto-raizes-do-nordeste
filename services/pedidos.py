@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from models import ItemPedido, Pedido, Produto, Unidade, Usuario
+from models import Estoque, ItemPedido, Pedido, Produto, Unidade, Usuario
 from models.enums import StatusPedido
 from schemas.pedido import PedidoCreate
 from services.exceptions import RecursoNaoEncontrado, RegraDeNegocioViolada
@@ -28,6 +28,18 @@ def criar_pedido(db: Session, usuario: Usuario, dados: PedidoCreate) -> Pedido:
         produto = db.get(Produto, item.produto_id)
         if produto is None:
             raise RecursoNaoEncontrado(f"Produto {item.produto_id} não encontrado")
+
+        estoque = (
+            db.query(Estoque)
+            .filter(Estoque.produto_id == produto.id, Estoque.unidade_id == dados.unidade_id)
+            .first()
+        )
+        disponivel = estoque.quantidade if estoque is not None else 0
+        if disponivel < item.quantidade:
+            raise RegraDeNegocioViolada(
+                f"Estoque insuficiente para o produto {produto.id} na unidade {dados.unidade_id}"
+            )
+        estoque.quantidade -= item.quantidade
 
         valor_total += produto.preco * item.quantidade
         pedido.itens.append(
