@@ -1,6 +1,7 @@
-def main():
-    print("Hello from projeto-final!")
+from fastapi import FastAPI
 
+app = FastAPI()
 
-if __name__ == "__main__":
-    main()
+@app.get("/")
+def health_check() -> dict:
+    return {"status": "Running!"}
