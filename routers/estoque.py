@@ -1,14 +1,16 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models import Estoque, PerfilUsuario
 from schemas.estoque import EstoqueRead, MovimentoEstoqueCreate
+from schemas.pagination import Pagina
 from services.auth import get_current_user, require_perfis
 from services.estoque import registrar_movimento
 from services.exceptions import RecursoNaoEncontrado, RegraDeNegocioViolada
+from services.paginacao import paginar
 
 router = APIRouter(prefix="/estoque", tags=["estoque"])
 
@@ -36,9 +38,15 @@ def movimentar(dados: MovimentoEstoqueCreate, db: DbSession) -> Estoque:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro))
 
 
-@router.get("", response_model=list[EstoqueRead], dependencies=[RequerLogin])
-def listar(db: DbSession, unidade_id: int | None = None) -> list[Estoque]:
+@router.get("", response_model=Pagina[EstoqueRead], dependencies=[RequerLogin])
+def listar(
+    db: DbSession,
+    unidade_id: int | None = None,
+    page: Annotated[int, Query(ge=1)] = 1,
+    limit: Annotated[int, Query(ge=1, le=100)] = 10,
+) -> dict:
     consulta = db.query(Estoque)
     if unidade_id is not None:
         consulta = consulta.filter(Estoque.unidade_id == unidade_id)
-    return consulta.all()
+    itens, total = paginar(consulta, page, limit)
+    return {"items": itens, "page": page, "limit": limit, "total": total}

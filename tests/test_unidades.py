@@ -54,7 +54,9 @@ def test_listar_unidades_publico(client, obter_token):
     resposta = client.get("/unidades")
 
     assert resposta.status_code == 200
-    assert len(resposta.json()) == 1
+    corpo = resposta.json()
+    assert len(corpo["items"]) == 1
+    assert corpo["total"] == 1
 
 
 def test_obter_unidade_inexistente(client):

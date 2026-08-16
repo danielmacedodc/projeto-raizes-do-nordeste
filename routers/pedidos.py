@@ -6,9 +6,11 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import Pedido, PerfilUsuario, Usuario
 from models.enums import CanalPedido, StatusPedido
+from schemas.pagination import Pagina
 from schemas.pedido import PedidoCreate, PedidoRead, PedidoStatusUpdate
 from services.auth import get_current_user, require_perfis
 from services.exceptions import RecursoNaoEncontrado, RegraDeNegocioViolada
+from services.paginacao import paginar
 from services.pedidos import atualizar_status, criar_pedido
 
 router = APIRouter(prefix="/pedidos", tags=["pedidos"])
@@ -35,13 +37,15 @@ def criar(dados: PedidoCreate, db: DbSession, usuario: UsuarioAtual) -> Pedido:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro))
 
 
-@router.get("", response_model=list[PedidoRead])
+@router.get("", response_model=Pagina[PedidoRead])
 def listar(
     db: DbSession,
     usuario: UsuarioAtual,
     canal_pedido: Annotated[CanalPedido | None, Query(alias="canalPedido")] = None,
     status_pedido: Annotated[StatusPedido | None, Query(alias="status")] = None,
-) -> list[Pedido]:
+    page: Annotated[int, Query(ge=1)] = 1,
+    limit: Annotated[int, Query(ge=1, le=100)] = 10,
+) -> dict:
     consulta = db.query(Pedido)
     if usuario.perfil == PerfilUsuario.CLIENTE:
         consulta = consulta.filter(Pedido.usuario_id == usuario.id)
@@ -49,7 +53,8 @@ def listar(
         consulta = consulta.filter(Pedido.canal == canal_pedido)
     if status_pedido is not None:
         consulta = consulta.filter(Pedido.status == status_pedido)
-    return consulta.all()
+    itens, total = paginar(consulta, page, limit)
+    return {"items": itens, "page": page, "limit": limit, "total": total}
 
 
 @router.get("/{pedido_id}", response_model=PedidoRead)

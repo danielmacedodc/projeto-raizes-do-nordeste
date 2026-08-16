@@ -101,8 +101,8 @@ def test_listar_pedidos_filtra_por_canal(client, obter_token, unidade_e_produto)
 
     assert resposta.status_code == 200
     corpo = resposta.json()
-    assert len(corpo) == 1
-    assert corpo[0]["canal"] == "TOTEM"
+    assert len(corpo["items"]) == 1
+    assert corpo["items"][0]["canal"] == "TOTEM"
 
 
 def test_cliente_ve_apenas_seus_pedidos(client, obter_token, unidade_e_produto):
@@ -118,7 +118,7 @@ def test_cliente_ve_apenas_seus_pedidos(client, obter_token, unidade_e_produto):
     resposta = client.get("/pedidos", headers={"Authorization": f"Bearer {token_b}"})
 
     assert resposta.status_code == 200
-    assert resposta.json() == []
+    assert resposta.json()["items"] == []
 
 
 def test_atualizar_status_transicao_valida(client, obter_token, unidade_e_produto):

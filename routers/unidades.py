@@ -1,12 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models import PerfilUsuario, Unidade
 from schemas import UnidadeCreate, UnidadeRead
+from schemas.pagination import Pagina
 from services.auth import require_perfis
+from services.paginacao import paginar
 
 router = APIRouter(prefix="/unidades", tags=["unidades"])
 
@@ -28,9 +30,14 @@ def criar_unidade(dados: UnidadeCreate, db: DbSession) -> Unidade:
     return unidade
 
 
-@router.get("", response_model=list[UnidadeRead])
-def listar_unidades(db: DbSession) -> list[Unidade]:
-    return db.query(Unidade).all()
+@router.get("", response_model=Pagina[UnidadeRead])
+def listar_unidades(
+    db: DbSession,
+    page: Annotated[int, Query(ge=1)] = 1,
+    limit: Annotated[int, Query(ge=1, le=100)] = 10,
+) -> dict:
+    itens, total = paginar(db.query(Unidade), page, limit)
+    return {"items": itens, "page": page, "limit": limit, "total": total}
 
 
 @router.get("/{unidade_id}", response_model=UnidadeRead)

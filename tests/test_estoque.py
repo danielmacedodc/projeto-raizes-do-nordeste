@@ -158,8 +158,8 @@ def test_listar_estoque_filtra_por_unidade(client, obter_token):
 
     assert resposta.status_code == 200
     corpo = resposta.json()
-    assert len(corpo) == 1
-    assert corpo[0]["quantidade"] == 10
+    assert len(corpo["items"]) == 1
+    assert corpo["items"][0]["quantidade"] == 10
 
 
 def test_pedido_bloqueado_por_estoque_insuficiente(client, obter_token):
@@ -231,6 +231,8 @@ def test_pedido_sucesso_decrementa_estoque(client, obter_token, unidade_e_produt
     )
 
     saldo = next(
-        item for item in resposta.json() if item["produto_id"] == unidade_e_produto["produto_id"]
+        item
+        for item in resposta.json()["items"]
+        if item["produto_id"] == unidade_e_produto["produto_id"]
     )
     assert saldo["quantidade"] == 97

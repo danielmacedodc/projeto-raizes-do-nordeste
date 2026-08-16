@@ -54,7 +54,9 @@ def test_listar_produtos_publico(client, obter_token):
     resposta = client.get("/produtos")
 
     assert resposta.status_code == 200
-    assert len(resposta.json()) == 1
+    corpo = resposta.json()
+    assert len(corpo["items"]) == 1
+    assert corpo["total"] == 1
 
 
 def test_obter_produto_inexistente(client):
