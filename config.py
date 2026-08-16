@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     secret_key: SecretStr 
     algorithm: str = "HS256" 
     access_token_expire_minutes: int = 30
-    database_url = "sqlite:///./raizes.db"
+    database_url: str = "sqlite:///./raizes.db"
     pagamento_mock_modo: str = "deterministico"
 
 
