@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from models import Estoque, ItemPedido, Pedido, Produto, Unidade, Usuario
 from models.enums import StatusPedido
 from schemas.pedido import PedidoCreate
+from services.auditoria import registrar as registrar_auditoria
 from services.exceptions import RecursoNaoEncontrado, RegraDeNegocioViolada
 from services.fidelidade import registrar_acumulo
 
@@ -56,6 +57,7 @@ def criar_pedido(db: Session, usuario: Usuario, dados: PedidoCreate) -> Pedido:
     db.add(pedido)
     db.commit()
     db.refresh(pedido)
+    registrar_auditoria("pedido_criado", usuario.id, pedido_id=pedido.id, canal=pedido.canal.value)
     return pedido
 
 
@@ -66,6 +68,7 @@ def atualizar_status(db: Session, pedido: Pedido, novo_status: StatusPedido) -> 
             f"Transição de {pedido.status.value} para {novo_status.value} não é permitida"
         )
 
+    status_anterior = pedido.status
     pedido.status = novo_status
 
     if novo_status == StatusPedido.ENTREGUE:
@@ -73,4 +76,9 @@ def atualizar_status(db: Session, pedido: Pedido, novo_status: StatusPedido) -> 
 
     db.commit()
     db.refresh(pedido)
+
+    acao = "pedido_cancelado" if novo_status == StatusPedido.CANCELADO else "pedido_status_alterado"
+    registrar_auditoria(
+        acao, pedido.usuario_id, pedido_id=pedido.id, de=status_anterior.value, para=novo_status.value
+    )
     return pedido

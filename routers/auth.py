@@ -7,6 +7,7 @@ from database import get_db
 from models import Usuario
 from schemas.auth import LoginRequest, TokenResponse
 from schemas.usuario import UsuarioCreate, UsuarioRead
+from services.auditoria import registrar
 from services.security import create_access_token, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -41,4 +42,5 @@ def login(dados: LoginRequest, db: DbSession) -> TokenResponse:
         )
 
     token = create_access_token(subject=str(usuario.id), perfil=usuario.perfil.value)
+    registrar("login", usuario.id, email=usuario.email)
     return TokenResponse(access_token=token)
