@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import DateTime, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.base import Base
+from models.base import Base, utc_now
 
 if TYPE_CHECKING:
     from models.produto import Produto
@@ -24,7 +24,7 @@ class Estoque(Base):
     unidade_id: Mapped[int] = mapped_column(ForeignKey("unidades.id"), nullable=False)
     quantidade: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     atualizado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        DateTime, default=utc_now, onupdate=utc_now, nullable=False
     )
 
     produto: Mapped["Produto"] = relationship(back_populates="estoques")

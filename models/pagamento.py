@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import DateTime, ForeignKey, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.base import Base
+from models.base import Base, utc_now
 from models.enums import StatusPagamento
 
 if TYPE_CHECKING:
@@ -22,6 +22,6 @@ class Pagamento(Base):
     metodo: Mapped[str] = mapped_column(String(40), nullable=False)
     status: Mapped[StatusPagamento] = mapped_column(default=StatusPagamento.PENDENTE, nullable=False)
     payload_mock: Mapped[str | None] = mapped_column(String(1000), nullable=True)
-    criado_em: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    criado_em: Mapped[datetime] = mapped_column(DateTime, default=utc_now, nullable=False)
 
     pedido: Mapped["Pedido"] = relationship(back_populates="pagamento")

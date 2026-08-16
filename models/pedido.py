@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import DateTime, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.base import Base
+from models.base import Base, utc_now
 from models.enums import CanalPedido, StatusPedido
 
 if TYPE_CHECKING:
@@ -25,9 +25,9 @@ class Pedido(Base):
     canal: Mapped[CanalPedido] = mapped_column(nullable=False)
     status: Mapped[StatusPedido] = mapped_column(default=StatusPedido.RECEBIDO, nullable=False)
     valor_total: Mapped[float] = mapped_column(Numeric(10, 2), default=0, nullable=False)
-    criado_em: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    criado_em: Mapped[datetime] = mapped_column(DateTime, default=utc_now, nullable=False)
     atualizado_em: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        DateTime, default=utc_now, onupdate=utc_now, nullable=False
     )
 
     usuario: Mapped["Usuario"] = relationship(back_populates="pedidos")
