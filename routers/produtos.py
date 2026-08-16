@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import PerfilUsuario, Produto
-from schemas import ProdutoCreate, ProdutoRead
+from schemas import ProdutoCreate, ProdutoRead, ProdutoUpdate
 from schemas.pagination import Pagina
 from services.auth import require_perfis
 from services.paginacao import paginar
@@ -49,3 +49,39 @@ def obter_produto(produto_id: int, db: DbSession) -> Produto:
     if produto is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
     return produto
+
+
+@router.patch(
+    "/{produto_id}",
+    response_model=ProdutoRead,
+    dependencies=[GerenciaProdutos],
+    summary="Atualizar produto",
+)
+def atualizar_produto(produto_id: int, dados: ProdutoUpdate, db: DbSession) -> Produto:
+    """Atualização parcial — envie só os campos que quer alterar. Restrito a ADMIN/GERENTE."""
+    produto = db.get(Produto, produto_id)
+    if produto is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+
+    for campo, valor in dados.model_dump(exclude_unset=True).items():
+        setattr(produto, campo, valor)
+
+    db.commit()
+    db.refresh(produto)
+    return produto
+
+
+@router.delete(
+    "/{produto_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[GerenciaProdutos],
+    summary="Excluir produto",
+)
+def excluir_produto(produto_id: int, db: DbSession) -> None:
+    """Exclusão lógica (`ativo = False`) — preserva histórico em pedidos/estoque. Restrito a ADMIN/GERENTE."""
+    produto = db.get(Produto, produto_id)
+    if produto is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+
+    produto.ativo = False
+    db.commit()
