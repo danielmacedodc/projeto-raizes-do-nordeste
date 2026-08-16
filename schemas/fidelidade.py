@@ -18,3 +18,8 @@ class FidelidadeRead(BaseModel):
 
 class FidelidadeResgate(BaseModel):
     pontos: int = Field(gt=0)
+
+
+class SaldoFidelidadeRead(BaseModel):
+    usuario_id: int
+    saldo: int

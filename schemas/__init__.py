@@ -11,7 +11,7 @@ from schemas.pedido import (
     PedidoStatusUpdate,
 )
 from schemas.pagamento import PagamentoCreate, PagamentoRead
-from schemas.fidelidade import FidelidadeRead, FidelidadeResgate
+from schemas.fidelidade import FidelidadeRead, FidelidadeResgate, SaldoFidelidadeRead
 
 __all__ = [
     "LoginRequest",
@@ -38,4 +38,5 @@ __all__ = [
     "PagamentoRead",
     "FidelidadeRead",
     "FidelidadeResgate",
+    "SaldoFidelidadeRead",
 ]

@@ -4,6 +4,7 @@ from models import Estoque, ItemPedido, Pedido, Produto, Unidade, Usuario
 from models.enums import StatusPedido
 from schemas.pedido import PedidoCreate
 from services.exceptions import RecursoNaoEncontrado, RegraDeNegocioViolada
+from services.fidelidade import registrar_acumulo
 
 # cozinha (EM_PREPARO) -> pronto -> entregue / cancelado; cancelamento permitido
 # em qualquer estado não-terminal
@@ -66,6 +67,10 @@ def atualizar_status(db: Session, pedido: Pedido, novo_status: StatusPedido) -> 
         )
 
     pedido.status = novo_status
+
+    if novo_status == StatusPedido.ENTREGUE:
+        registrar_acumulo(db, pedido.usuario_id, pedido.id, pedido.valor_total)
+
     db.commit()
     db.refresh(pedido)
     return pedido
