@@ -4,15 +4,22 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Produto
+from models import PerfilUsuario, Produto
 from schemas import ProdutoCreate, ProdutoRead
+from services.auth import require_perfis
 
 router = APIRouter(prefix="/produtos", tags=["produtos"])
 
 DbSession = Annotated[Session, Depends(get_db)]
+GerenciaProdutos = Depends(require_perfis(PerfilUsuario.ADMIN, PerfilUsuario.GERENTE))
 
 
-@router.post("", response_model=ProdutoRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=ProdutoRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[GerenciaProdutos],
+)
 def criar_produto(dados: ProdutoCreate, db: DbSession) -> Produto:
     produto = Produto(**dados.model_dump())
     db.add(produto)

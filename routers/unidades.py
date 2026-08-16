@@ -4,15 +4,22 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Unidade
+from models import PerfilUsuario, Unidade
 from schemas import UnidadeCreate, UnidadeRead
+from services.auth import require_perfis
 
 router = APIRouter(prefix="/unidades", tags=["unidades"])
 
 DbSession = Annotated[Session, Depends(get_db)]
+GerenciaUnidades = Depends(require_perfis(PerfilUsuario.ADMIN, PerfilUsuario.GERENTE))
 
 
-@router.post("", response_model=UnidadeRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=UnidadeRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[GerenciaUnidades],
+)
 def criar_unidade(dados: UnidadeCreate, db: DbSession) -> Unidade:
     unidade = Unidade(**dados.model_dump())
     db.add(unidade)
